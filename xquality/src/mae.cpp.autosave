@@ -201,152 +201,74 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
+#include "precomp.hpp"
 
-#ifndef XQUALITY_HPP
-#define XQUALITY_HPP
+using namespace cv;
+using namespace quality;
+using namespace xquality;
 
-#include "opencv2/core.hpp"
-#include "opencv2/quality.hpp"
-#include "opencv2/features2d.hpp"
-#include "opencv2/ml.hpp"
 
-namespace cv
+namespace
 {
 
-using quality::QualityBase;
+    using mse_mat_type = UMat;
+    using _quality_map_type = mse_mat_type;
 
-namespace xquality
-{
+    template<class T>
+    void abs_(T&);
 
-/**
-@brief Full reference mean absolute error algorithm  https://en.wikipedia.org/wiki/Mean_absolute_error
-*/
-class CV_EXPORTS_W QualityMAE : public QualityBase {
-public:
-
-    /** @brief Computes MAE for reference images supplied in class constructor and provided comparison images
-    @param cmpImgs Comparison image(s)
-    @returns cv::Scalar with per-channel quality values.  Values range from 0 (best) to potentially max float (worst)
-    */
-    CV_WRAP Scalar compute( InputArrayOfArrays cmpImgs ) CV_OVERRIDE;
-
-    /** @brief Implements Algorithm::empty()  */
-    CV_WRAP bool empty() const CV_OVERRIDE { return _ref.empty() && QualityBase::empty(); }
-
-    /** @brief Implements Algorithm::clear()  */
-    CV_WRAP void clear() CV_OVERRIDE { _ref = _mat_type(); QualityBase::clear(); }
-
-    /**
-    @brief Create an object which calculates quality
-    @param ref input image to use as the reference for comparison
-    */
-    CV_WRAP static Ptr<QualityMAE> create(InputArray ref);
-
-    /**
-    @brief static method for computing quality
-    @param ref reference image
-    @param cmp comparison image=
-    @param qualityMap output quality map, or cv::noArray()
-    @returns cv::Scalar with per-channel quality values.  Values range from 0 (best) to max float (worst)
-    */
-    CV_WRAP static Scalar compute( InputArray ref, InputArray cmp, OutputArray qualityMap );
-
-protected:
-
-    /** @brief Reference image, converted to internal mat type */
-    QualityBase::_mat_type _ref;
-
-    /**
-    @brief Constructor
-    @param ref reference image, converted to internal type
-    */
-    QualityMAE(QualityBase::_mat_type ref)
-        : _ref(std::move(ref))
-    {}
-
-};  // QualityMAE
-
-
-
-class CV_EXPORTS_W QualityBlockSVD : public QualityBase
-{
-public:
-
-    virtual ~QualityBlockSVD() CV_OVERRIDE = default;
-
-
-    /** @brief Implements Algorithm::empty()  */
-    CV_WRAP virtual bool empty() const CV_OVERRIDE  = 0;
-
-    /** @brief Implements Algorithm::clear()  */
-    CV_WRAP virtual void clear() CV_OVERRIDE = 0;
-
-    /**
-    @brief Create an object which calculates quality
-    @param ref input image to use as the reference for comparison
-    */
-    CV_WRAP static Ptr<QualityBlockSVD> create(InputArray ref = noArray(), const Size& blockSize = Size(8,8));
-
-    /**
-    @brief Create an object which calculates quality
-    @param model_file_path cv::String which contains a path to the GMLOG model data, eg. /path/to/blocksvd_model_live.yml
-    @param range_file_path cv::String which contains a path to the GMLOG range data, eg. /path/to/blocksvd_range_live.yml
-    */
-    CV_WRAP static Ptr<QualityBlockSVD> create( const String& model_file_path, const String& range_file_path );
-
-    /**
-    @brief Create an object which calculates quality
-    @param model cv::Ptr<cv::ml::SVM> which contains a loaded GMLOG model
-    @param range cv::Mat which contains GMLOG range data
-    */
-    CV_WRAP static Ptr<QualityBlockSVD> create( const Ptr<cv::ml::SVM>& model, const Mat& range );
-
-    /** @brief Computes MSE for reference images supplied in class constructor and provided comparison images
-    @param cmpImgs Comparison image(s)
-    @returns cv::Scalar with per-channel quality values.  Values range from 0 (best) to potentially max float (worst)
-    */
-    CV_WRAP virtual cv::Scalar compute( InputArray cmpImgs ) CV_OVERRIDE  = 0;
-
-    /**
-    @brief method for computing quality
-    @param ref reference image
-    @param cmp comparison image
-    @param qualityMap output quality map, or cv::noArray()
-    @returns cv::Scalar with per-channel quality values.  Values range from 0 (worst) to 1 (best)
-    */
-    CV_WRAP virtual cv::Scalar compute( InputArray ref, InputArray cmp, OutputArray qualityMap) = 0;
-
-    /**
-    @brief method for computing quality
-    @param ref reference image
-    @param cmp comparison image
-    @returns cv::Scalar with per-channel quality values.  Values range from 0 (worst) to 1 (best)
-    */
-    CV_WRAP inline cv::Scalar compute( InputArray ref, InputArray cmp )
+    template<>
+    void abs_(Mat& m)
     {
-        return this->compute(ref, cmp, noArray());
+        abs(m);
     }
 
-    /**
-    @brief method that return the size of the block size used to compute the score
-    */
-    CV_WRAP virtual Size getBlockSize() const = 0;
+    template<>
+    void abs_(UMat& m)
+    {
+        absdiff(m, 0, m);
+    }
 
-    /**
-    @brief method to set the block size used to compute the score
-    */
-    CV_WRAP virtual void setBlockSize(const Size& size) = 0;
+    // computes mae and quality map for single frame
+    std::pair<Scalar, _quality_map_type> compute(const mse_mat_type& lhs, const mse_mat_type& rhs)
+    {
+        std::pair<Scalar, _quality_map_type> result;
 
+        subtract( lhs, rhs, result.second );
 
-    /**
-    @brief method returning the name of the current algorithm
-    */
-    CV_WRAP virtual String getDefaultName() const CV_OVERRIDE;
-};
+        abs_(result.second);
 
+        result.first = mean(result.second);
 
-} // quality
+        return result;
+    }
+} // anonymous
 
-} // cv
+// static
+Ptr<QualityMAE> QualityMAE::create( InputArray ref )
+{
+    return Ptr<QualityMAE>(new QualityMAE(quality_utils::expand_mat<mse_mat_type>(ref)));
+}
 
-#endif
+// static
+Scalar QualityMAE::compute( InputArray ref_, InputArray cmp_, OutputArray qualityMap )
+{
+    auto ref = quality_utils::expand_mat<mse_mat_type>(ref_);
+    auto cmp = quality_utils::expand_mat<mse_mat_type>(cmp_);
+
+    auto result = ::compute(ref, cmp);
+
+    if (qualityMap.needed())
+        qualityMap.assign(result.second);
+
+    return result.first;
+}
+
+Scalar QualityMAE::compute( InputArray cmp_ )
+{
+    auto cmp = quality_utils::expand_mat<mse_mat_type>(cmp_);
+    auto result = ::compute( this->_ref, cmp );
+    OutputArray(this->_qualityMap).assign(result.second);
+    return result.first;
+}
+
