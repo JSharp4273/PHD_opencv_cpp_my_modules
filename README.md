@@ -14,8 +14,10 @@ Both GMLOG-BIQA and the SVDBased metric have availlable MatLab code publicly.
 Because GMLOG-BIQA code does not have any license, NO LICENSE has been given to this folder.
 Nonetheless, the Mean Absolute Error code is under Apache 2.0 license and the SVDBased metric (with respect to the original BSD-2 clause license).
 
-The folder "mlx" (ml extra) adds the multidimensional Linear Regression, as well as the Partial Least Square Regression.
-Like "xcore" both algorithms can benefit from the TAPI.
+The folder "mlx" (ml extra) adds the multidimensional Linear Regression, as well as the Partial Least Square Regression (PLSR).
+The PLSR algorithm is based on the SIMPLS algorithm, introduced by De Jong, Sijmen. "SIMPLS: an alternative approach to partial least squares regression." Chemometrics and intelligent laboratory systems 18.3 (1993): 251-263.
+Both algorithms can benefit from the TAPI, for training and prediction.
+
 
 The folder "cudaxcore" offers the same arithmetics functions, whose can be found in the  "xcore" folder.
 It also offers an interface with the library arrayFire, which implements several standard linear algebra decomposition algorithms such as the SVD.
