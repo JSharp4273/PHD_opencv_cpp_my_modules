@@ -1,30 +1,14 @@
 # PHD_opencv_cpp_my_modules
-These folders contain several algorithms I implemented during my Ph.D.
+This GitHub repository contains several folders containing algorithms that I implemented during my Ph.D. The purpose of each folder is as follows:
 
-The folder "xcore" contains essential functions to manage input and hardware accelerated functions for working with Meta-Templates.
-It also contains some tools to implement more efficient functions using the TAPI and high priority parallel for loop.
-A linear algebra function is also added to solve least-squares problems.
-Some other functions, such as the Kronecker product, can be found in this folder.
-Note that all the functions benefit from the TAPI.
+-"xcore": This folder contains essential functions for managing input and hardware accelerated functions for working with Meta-Templates. It also includes tools for implementing more efficient functions using the TAPI and high-priority parallel for loop. Additionally, a linear algebra function for solving least-squares problems and other functions like Kronecker product can be found in this folder. All the functions in this folder benefit from the TAPI.
 
-The folder "xquality" contains the implementation of three metrics, the Mean Absolute Error, GMLOG-BIQA, and an SVD based metric.
-The GMLOG-BIQA was proposed by Xue et al : Blind image quality assessment using joint statistics of gradient magnitude and laplacian features.IEEE Transactions on ImageProcessing, 23(11):4850–4862, 2014.
-The SVDBased metric was introduced by Shnayderman et al. : An SVD-Based Grayscale Image Quality Measure for Local and Global Assessment",  IEEE TRANSACTIONS ON IMAGE PROCESSING, VOL. 15, NO. 2, FEBRUARY 2006.
-Both GMLOG-BIQA and the SVDBased metric have availlable MatLab code publicly.
-Because GMLOG-BIQA code does not have any license, NO LICENSE has been given to this folder.
-Nonetheless, the Mean Absolute Error code is under Apache 2.0 license and the SVDBased metric (with respect to the original BSD-2 clause license).
+-"xquality": This folder contains the implementation of three metrics: Mean Absolute Error, GMLOG-BIQA, and an SVD-based metric. The GMLOG-BIQA was proposed by Xue et al. in the paper "Blind image quality assessment using joint statistics of gradient magnitude and Laplacian features" published in IEEE Transactions on Image Processing, 2014. The SVDBased metric was introduced by Shnayderman et al. in the paper "An SVD-Based Grayscale Image Quality Measure for Local and Global Assessment" published in IEEE Transactions on Image Processing, 2006. Both GMLOG-BIQA and the SVDBased metric have publicly available MATLAB code. Please note that GMLOG-BIQA code does not have any license, so NO LICENSE has been given to this folder. However, the Mean Absolute Error code is under Apache 2.0 license and the SVDBased metric is under the original BSD-2 clause license.
 
-The folder "mlx" (ml extra) adds the multidimensional Linear Regression, as well as the Partial Least Square Regression (PLSR).
-The PLSR algorithm is based on the SIMPLS algorithm, introduced by De Jong, Sijmen. "SIMPLS: an alternative approach to partial least squares regression." Chemometrics and intelligent laboratory systems 18.3 (1993): 251-263.
-Both algorithms can benefit from the TAPI, for training and prediction.
+-"mlx" (ml extra): This folder adds multidimensional Linear Regression and Partial Least Square Regression (PLSR) algorithms. The PLSR algorithm is based on the SIMPLS algorithm introduced by De Jong in the paper "SIMPLS: an alternative approach to partial least squares regression" published in Chemometrics and Intelligent Laboratory Systems, 1993. Both algorithms can benefit from the TAPI for training and prediction.
 
+-"cudaxcore": This folder offers the same arithmetic functions as the "xcore" folder, along with an interface with the arrayFire library, which implements several standard linear algebra decomposition algorithms such as the SVD. Other functions in this module are currently under revision.
 
-The folder "cudaxcore" offers the same arithmetics functions, whose can be found in the  "xcore" folder.
-It also offers an interface with the library arrayFire, which implements several standard linear algebra decomposition algorithms such as the SVD.
-Other functions for this module are currently under revision.
+-"cudaml": This folder implements the same algorithms as the "mlx" folder, but using the OpenCV's CUDA API for GPU acceleration.
 
-The folder "cudaml" implements the same algorithm that can be found in the folder "mlx", using the OpenCV"s CUDA API.
-
-Note that these functions were initially developed at different moments during the last few years.
-I have compiled a custom OpenCV-4.5.3 with CUDA 11.4, and test successfully tested all of them.
-These codes were evaluated under UBUNTU 20.04 in September 2021.
+Please note that these functions were developed at different moments during the last few years. I have compiled a custom OpenCV-4.5.3 with CUDA 11.4 and successfully tested all of them. These codes were evaluated under Ubuntu 20.04 in September 2021. Also note that the most of the code is licenced under BSD-3 clause, some algorithms (e.g. GMLOG-BIQA) are NOT licenced.
